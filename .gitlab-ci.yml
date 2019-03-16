@@ -20,18 +20,50 @@ before_script:
 stages:
   - build
 
-compile-linux:
+compile-amd64-linux:
   stage: build
   script:
-    - env GOOS=linux GOARCH=amd64 go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/sri-amd64-linux
+    - env GOOS=linux GOARCH=amd64 go build -o $CI_PROJECT_DIR/sri-amd64-linux
   artifacts:
     paths:
       - sri-amd64-linux
 
-compile-windows:
+compile-386-linux:
   stage: build
   script:
-    - env GOOS=windows GOARCH=amd64 go build -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/sri-amd64-windows.exe
+    - env GOOS=linux GOARCH=386 go build -o $CI_PROJECT_DIR/sri-386-linux
+  artifacts:
+    paths:
+      - sri-386-linux
+
+compile-amd64-darwin:
+  stage: build
+  script:
+    - env GOOS=darwin GOARCH=amd64 go build -o $CI_PROJECT_DIR/sri-amd64-darwin
+  artifacts:
+    paths:
+      - sri-amd64-darwin
+
+compile-386-darwin:
+  stage: build
+  script:
+    - env GOOS=darwin GOARCH=386 go build -o $CI_PROJECT_DIR/sri-386-darwin
+  artifacts:
+    paths:
+      - sri-386-darwin
+
+compile-amd64-windows:
+  stage: build
+  script:
+    - env GOOS=windows GOARCH=amd64 go build -o $CI_PROJECT_DIR/sri-amd64-windows.exe
   artifacts:
     paths:
       - sri-amd64-windows.exe
+
+compile-386-windows:
+  stage: build
+  script:
+    - env GOOS=windows GOARCH=386 go build -o $CI_PROJECT_DIR/sri-386-windows.exe
+  artifacts:
+    paths:
+      - sri-386-windows.exe
