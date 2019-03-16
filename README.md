@@ -2,7 +2,7 @@
 
 SRI is a cli tool to create sub ressource integrity hashes of a resource file.
 
-### Usage
+## Usage
 
 `sri [OPTION] <url>`
 
@@ -27,3 +27,9 @@ $ sri -sha512 https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.m
 Returns:
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha512-tDXPcamuZsWWd6OsKFyH6nAqh/MjZ/5Yk88T5o+aMfygqNFPan1pLyPFAndRzmOWHKT+jSDzWpJv8krj6x1LMA==" crossorigin="anonymous">
 ````
+
+## Installation
+
+See [tags](https://git.bn4t.me/root/sri/tags) for available stable binaries. 
+
+Alternatively all CI jobs store the latest binaries as artifacts. Artifacts are stored for 4 weeks.
