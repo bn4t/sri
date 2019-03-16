@@ -12,6 +12,8 @@ SRI is a cli tool to create sub resource integrity hashes of a resource file.
 - `-sha384` Use sha384 as hash function (default)
 - `-sha512` Use sha512 as hash function
 
+See `sri -h` for help.
+
 #### Examples
 
 ````
