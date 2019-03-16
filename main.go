@@ -13,15 +13,13 @@ import (
 	"time"
 )
 
-
 var h hash.Hash
 var hashFunc = "sha384"
 var resUrl string
 
-func main()  {
+func main() {
 
 	args := os.Args
-
 
 	if len(args) == 1 {
 		println("No arguments supplied. See \"sri -h\" for help.")
@@ -44,8 +42,6 @@ func main()  {
 		println("")
 		os.Exit(0)
 	}
-
-
 
 	// check arguments
 	if len(args) == 3 {
@@ -74,7 +70,7 @@ func main()  {
 	default:
 
 		// exit if the defined hash function is none of the above
-		if strings.HasPrefix(args[1],"-") {
+		if strings.HasPrefix(args[1], "-") {
 			println("Invalid hash function \"" + args[1] + "\". Available hash functions are sha256, sha384 and sha512.")
 			os.Exit(1)
 		}
@@ -88,13 +84,12 @@ func main()  {
 	// create the hash and encode it with base64
 	hash64 := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	if strings.HasSuffix(resUrl, ".js") {
-		println("<script src=\""+resUrl+"\" integrity=\""+hashFunc+"-"+hash64+"\" crossorigin=\"anonymous\"></script>")
-	} else if strings.HasSuffix(resUrl, ".css") {
-		println("<link rel=\"stylesheet\" href=\""+resUrl+"\" integrity=\""+hashFunc+"-"+hash64+"\" crossorigin=\"anonymous\">")
+	if strings.HasSuffix(resUrl, ".css") {
+		println("<link rel=\"stylesheet\" href=\"" + resUrl + "\" integrity=\"" + hashFunc + "-" + hash64 + "\" crossorigin=\"anonymous\">")
+	} else {
+		println("<script src=\"" + resUrl + "\" integrity=\"" + hashFunc + "-" + hash64 + "\" crossorigin=\"anonymous\"></script>")
 	}
 }
-
 
 func isValidUrl(toTest string) bool {
 	_, err := url.ParseRequestURI(toTest)
@@ -105,14 +100,13 @@ func isValidUrl(toTest string) bool {
 	}
 }
 
-func exitWithError(err error)  {
+func exitWithError(err error) {
 	println("An error occurred:")
 	println(err)
 	os.Exit(1)
 }
 
 func retrieveContent(url string) {
-
 
 	// check url for validity
 	if !isValidUrl(url) {
@@ -133,7 +127,6 @@ func retrieveContent(url string) {
 
 	// set additional headers
 	req.Header.Set("User-Agent", "SRI Tool/1.0")
-
 
 	// execute the http request
 	resp, err := client.Do(req)
