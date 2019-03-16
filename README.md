@@ -1,6 +1,6 @@
 # SRI
 
-SRI is a cli tool to create sub ressource integrity hashes of a resource file.
+SRI is a cli tool to create sub resource integrity hashes of a resource file.
 
 ## Usage
 
