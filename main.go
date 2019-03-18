@@ -126,7 +126,7 @@ func retrieveContent(url string) {
 	}
 
 	// set additional headers
-	req.Header.Set("User-Agent", "SRI Tool/1.0")
+	req.Header.Set("User-Agent", "SRI Tool/1.0 (git.bn4t.me/root/sri)")
 
 	// execute the http request
 	resp, err := client.Do(req)
