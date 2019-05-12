@@ -32,6 +32,4 @@ Returns:
 
 ## Installation
 
-See [releases](https://git.bn4t.me/root/sri/releases) for available stable binaries. 
-
-Alternatively all [CI jobs](https://git.bn4t.me/root/sri/pipelines) store the latest binaries as artifacts. Artifacts are stored for 4 weeks.
+See [releases](https://git.bn4t.me/bn4t/sri/releases) for available binaries. 
