@@ -32,4 +32,4 @@ Returns:
 
 ## Installation
 
-See [releases](https://git.bn4t.me/bn4t/sri/releases) for available binaries. 
+See [releases](https://github.com/bn4t/sri/releases) for available binaries. 
