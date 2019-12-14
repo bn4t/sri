@@ -34,7 +34,7 @@ Returns:
 
 Install the dependencies:
 
-- go (>=1.12)
+- go (>=1.13)
 
 Then compile sri:
 
