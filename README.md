@@ -38,10 +38,14 @@ Install the dependencies:
 
 Then compile sri:
 
-`$ make`
+````
+$ make
+````
 
 ## Installation
 
-`$ make install`
+````
+$ make install
+````
 
 By default sri will be installed under `/usr/local/bin/`
