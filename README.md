@@ -30,6 +30,18 @@ Returns:
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha512-tDXPcamuZsWWd6OsKFyH6nAqh/MjZ/5Yk88T5o+aMfygqNFPan1pLyPFAndRzmOWHKT+jSDzWpJv8krj6x1LMA==" crossorigin="anonymous">
 ````
 
+## Building
+
+Install the dependencies:
+
+- go (>=1.12)
+
+Then compile sri:
+
+`$ make`
+
 ## Installation
 
-See [releases](https://git.bn4t.me/bn4t/sri/releases) for available binaries. 
+`$ make install`
+
+By default sri will be installed under `/usr/local/bin/`
