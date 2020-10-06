@@ -1,3 +1,3 @@
-module github.com/bn4t/sri
+module github.com/baretools/sri
 
 go 1.15
