@@ -4,7 +4,7 @@ SRI is a cli tool to create sub resource integrity hashes of a resource file.
 
 ## Usage
 
-`sri [OPTION] [<url1> <url2> ... <urlN>`
+`sri [OPTION] [<url1> <url2> ... <urlN>]`
 
 #### Options
 

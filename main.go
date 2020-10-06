@@ -97,7 +97,7 @@ func exitWithError(err error) {
 
 func usage() {
 	fmt.Println("Usage:")
-	fmt.Println("  sri [OPTION] [<url1> <url2> ... <urlN>")
+	fmt.Println("  sri [OPTION] [<url1> <url2> ... <urlN>]")
 	fmt.Println("")
 	fmt.Println("Options:")
 	fmt.Println("  -sha256	Use sha256 as hash function")
