@@ -19,6 +19,7 @@ import (
 )
 
 var h hash.Hash
+var hashName string
 var useSha256 bool
 var useSha384 bool
 var useSha512 bool
@@ -40,7 +41,7 @@ func main() {
 		if err != nil {
 			exitWithError(err)
 		}
-		if fi.Size() == 0 {
+		if fi.Mode()&os.ModeNamedPipe == 0 {
 			fmt.Println("No urls supplied. See \"sri -h\" for help.")
 			os.Exit(1)
 		}
@@ -63,10 +64,13 @@ func main() {
 	// initialize the chosen hash function
 	if useSha256 {
 		h = sha256.New()
-	} else if useSha384 {
-		h = sha512.New384()
+		hashName = "sha256"
 	} else if useSha512 {
 		h = sha512.New()
+		hashName = "sha512"
+	} else if useSha384 {
+		h = sha512.New384()
+		hashName = "sha384"
 	}
 
 	for _, v := range urls {
@@ -83,9 +87,9 @@ func main() {
 		sriHash := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
 		if strings.HasSuffix(v, ".css") {
-			fmt.Println("<link rel=\"stylesheet\" href=\"" + v + "\" integrity=\"" + sriHash + "-" + sriHash + "\" crossorigin=\"anonymous\">")
+			fmt.Println("<link rel=\"stylesheet\" href=\"" + v + "\" integrity=\"" + hashName + "-" + sriHash + "\" crossorigin=\"anonymous\">")
 		} else {
-			fmt.Println("<script src=\"" + v + "\" integrity=\"" + sriHash + "-" + sriHash + "\" crossorigin=\"anonymous\"></script>")
+			fmt.Println("<script src=\"" + v + "\" integrity=\"" + hashName + "-" + sriHash + "\" crossorigin=\"anonymous\"></script>")
 		}
 	}
 }
