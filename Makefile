@@ -18,7 +18,7 @@ all: build
 RM?=rm -f
 
 build: $(GOSRC)
-	$(GO) build $(GOFLAGS) -o sri
+	CGO_ENABLED=0 $(GO) build $(GOFLAGS) -o sri
 
 install: build
 	install -m755 sri $(BINDIR)/sri

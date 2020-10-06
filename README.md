@@ -4,7 +4,7 @@ SRI is a cli tool to create sub resource integrity hashes of a resource file.
 
 ## Usage
 
-`sri [OPTION] <url>`
+`sri [OPTION] [<url1> <url2> ... <urlN>`
 
 #### Options
 
@@ -34,7 +34,7 @@ Returns:
 
 Install the dependencies:
 
-- go (>=1.13)
+- go (>=1.15)
 
 Then compile sri:
 

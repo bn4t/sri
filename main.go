@@ -1,149 +1,145 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
+	"errors"
+	"flag"
+	"fmt"
 	"hash"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 var h hash.Hash
-var hashFunc = "sha384"
-var resUrl string
+var useSha256 bool
+var useSha384 bool
+var useSha512 bool
+var urls = make([]string, 0)
+var client = &http.Client{
+	Timeout: time.Second * 10,
+}
 
 func main() {
+	flag.BoolVar(&useSha256, "sha256", false, "Use sha256 as hash function")
+	flag.BoolVar(&useSha384, "sha384", true, "Use sha384 as hash function")
+	flag.BoolVar(&useSha512, "sha512", false, "Use sha512 as hash function")
+	flag.Usage = usage
+	flag.Parse()
 
-	args := os.Args
-
-	if len(args) == 1 {
-		println("No arguments supplied. See \"sri -h\" for help.")
-		os.Exit(1)
-	}
-
-	// help page
-	if args[1] == "--help" || args[1] == "-h" {
-		println("Usage:")
-		println("  sri [OPTION] <url>")
-		println("")
-		println("Options:")
-		println("  -sha256	Use sha256 as hash function")
-		println("  -sha384	Use sha384 as hash function (default)")
-		println("  -sha512	Use sha512 as hash function")
-		println("")
-		println("Examples:")
-		println("  sri https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js")
-		println("  sri -sha512 https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
-		println("")
-		os.Exit(0)
-	}
-
-	// check arguments
-	if len(args) == 3 {
-		resUrl = strings.ToLower(args[2])
-	} else if len(args) == 2 {
-		resUrl = strings.ToLower(args[1])
-	} else {
-		println("Invalid amount of arguments.")
-		os.Exit(1)
-	}
-
-	// get defined hash function
-	// default is sha384
-	switch args[1] {
-	case "-sha256":
-		h = sha256.New()
-		hashFunc = "sha256"
-
-	case "-sha384":
-		h = sha512.New384()
-
-	case "-sha512":
-		h = sha512.New()
-		hashFunc = "sha512"
-
-	default:
-
-		// exit if the defined hash function is none of the above
-		if strings.HasPrefix(args[1], "-") {
-			println("Invalid hash function \"" + args[1] + "\". Available hash functions are sha256, sha384 and sha512.")
+	// if no urls are supplied as arguments check if stdin contains urls
+	if len(flag.Args()) == 0 {
+		fi, err := os.Stdin.Stat()
+		if err != nil {
+			exitWithError(err)
+		}
+		if fi.Size() == 0 {
+			fmt.Println("No urls supplied. See \"sri -h\" for help.")
 			os.Exit(1)
 		}
 
+		scan := bufio.NewScanner(os.Stdin)
+		for {
+			scan.Scan()
+			input := scan.Text()
+
+			if len(input) != 0 {
+				urls = append(urls, input)
+			} else {
+				break
+			}
+		}
+	} else {
+		urls = flag.Args()
+	}
+
+	// initialize the chosen hash function
+	if useSha256 {
+		h = sha256.New()
+	} else if useSha384 {
 		h = sha512.New384()
+	} else if useSha512 {
+		h = sha512.New()
 	}
 
-	// retrieve the content of the specified url and write it into variable h
-	retrieveContent(resUrl)
+	for _, v := range urls {
+		// retrieve the content of the specified url and write it into variable h
+		d, err := retrieveContent(v)
+		if err != nil {
+			exitWithError(err)
+		}
 
-	// create the hash and encode it with base64
-	hash64 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+		// create the hash and encode it with base64
+		if _, err := h.Write(d); err != nil {
+			exitWithError(err)
+		}
+		sriHash := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	if strings.HasSuffix(resUrl, ".css") {
-		println("<link rel=\"stylesheet\" href=\"" + resUrl + "\" integrity=\"" + hashFunc + "-" + hash64 + "\" crossorigin=\"anonymous\">")
-	} else {
-		println("<script src=\"" + resUrl + "\" integrity=\"" + hashFunc + "-" + hash64 + "\" crossorigin=\"anonymous\"></script>")
-	}
-}
-
-func isValidUrl(toTest string) bool {
-	_, err := url.ParseRequestURI(toTest)
-	if err != nil {
-		return false
-	} else {
-		return true
+		if strings.HasSuffix(v, ".css") {
+			fmt.Println("<link rel=\"stylesheet\" href=\"" + v + "\" integrity=\"" + sriHash + "-" + sriHash + "\" crossorigin=\"anonymous\">")
+		} else {
+			fmt.Println("<script src=\"" + v + "\" integrity=\"" + sriHash + "-" + sriHash + "\" crossorigin=\"anonymous\"></script>")
+		}
 	}
 }
 
 func exitWithError(err error) {
-	println("An error occurred:")
-	println(err)
+	fmt.Println(err.Error())
 	os.Exit(1)
 }
 
-func retrieveContent(url string) {
+func usage() {
+	fmt.Println("Usage:")
+	fmt.Println("  sri [OPTION] [<url1> <url2> ... <urlN>")
+	fmt.Println("")
+	fmt.Println("Options:")
+	fmt.Println("  -sha256	Use sha256 as hash function")
+	fmt.Println("  -sha384	Use sha384 as hash function (default)")
+	fmt.Println("  -sha512	Use sha512 as hash function")
+	fmt.Println("")
+	fmt.Println("Examples:")
+	fmt.Println("  sri https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js")
+	fmt.Println("  sri -sha512 https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
+	fmt.Println("")
+}
 
-	// check url for validity
-	if !isValidUrl(url) {
-		println("Invalid URL given.")
-		os.Exit(1)
-	}
-
-	// initialize the http client
-	client := &http.Client{
-		Timeout: time.Second * 10, // define http client timeout
+func retrieveContent(uri string) ([]byte, error) {
+	if _, err := url.ParseRequestURI(uri); err != nil {
+		return nil, err
 	}
 
 	// create the http request
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		exitWithError(err)
+		return nil, err
 	}
 
-	// set additional headers
-	req.Header.Set("User-Agent", "SRI Tool/0.0.3 (https://git.bn4t.me/bn4t/sri)")
+	// set user agent
+	req.Header.Set("User-Agent", "SRI cli/0.0.4 (https://github.com/bn4t/sri)")
 
 	// execute the http request
 	resp, err := client.Do(req)
 	if err != nil {
-		exitWithError(err)
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	// check status code
 	if resp.StatusCode != 200 {
-		println(url + ": " + resp.Status)
-		os.Exit(1)
+		return nil, errors.New(uri + " returned status code " + strconv.Itoa(resp.StatusCode))
 	}
 
-	_, err = io.Copy(h, resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		exitWithError(err)
+		return nil, err
 	}
+	return body, err
 }
