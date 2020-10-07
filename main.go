@@ -134,8 +134,6 @@ func retrieveContent(uri string) ([]byte, error) {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
-
 	// check status code
 	if resp.StatusCode != 200 {
 		return nil, errors.New(uri + " returned status code " + strconv.Itoa(resp.StatusCode))
@@ -145,5 +143,10 @@ func retrieveContent(uri string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return body, err
+
+	if err := resp.Body.Close(); err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
