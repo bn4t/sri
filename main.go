@@ -126,7 +126,7 @@ func retrieveContent(uri string) ([]byte, error) {
 	}
 
 	// set user agent
-	req.Header.Set("User-Agent", "SRI cli/0.0.4 (https://github.com/bn4t/sri)")
+	req.Header.Set("User-Agent", "SRI cli/0.0.4 (https://github.com/baretools/sri)")
 
 	// execute the http request
 	resp, err := client.Do(req)
