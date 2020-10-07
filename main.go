@@ -15,10 +15,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
-var h hash.Hash
 var hashName string
 var useSha256 bool
 var useSha384 bool
@@ -27,6 +27,7 @@ var urls = make([]string, 0)
 var client = &http.Client{
 	Timeout: time.Second * 10,
 }
+var wg = &sync.WaitGroup{}
 
 func main() {
 	flag.BoolVar(&useSha256, "sha256", false, "Use sha256 as hash function")
@@ -61,37 +62,55 @@ func main() {
 		urls = flag.Args()
 	}
 
-	// initialize the chosen hash function
+	// set hash name
 	if useSha256 {
-		h = sha256.New()
 		hashName = "sha256"
 	} else if useSha512 {
-		h = sha512.New()
 		hashName = "sha512"
-	} else if useSha384 {
-		h = sha512.New384()
+	} else {
 		hashName = "sha384"
 	}
 
 	for _, v := range urls {
-		// retrieve the content of the specified url and write it into variable h
-		d, err := retrieveContent(v)
-		if err != nil {
-			exitWithError(err)
-		}
-
-		// create the hash and encode it with base64
-		if _, err := h.Write(d); err != nil {
-			exitWithError(err)
-		}
-		sriHash := base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-		if strings.HasSuffix(v, ".css") {
-			fmt.Println("<link rel=\"stylesheet\" href=\"" + v + "\" integrity=\"" + hashName + "-" + sriHash + "\" crossorigin=\"anonymous\">")
-		} else {
-			fmt.Println("<script src=\"" + v + "\" integrity=\"" + hashName + "-" + sriHash + "\" crossorigin=\"anonymous\"></script>")
-		}
+		wg.Add(1)
+		go generateSri(v)
 	}
+
+	// wait for all goroutines to finish
+	wg.Wait()
+}
+
+func generateSri(uri string) {
+	var h hash.Hash
+
+	// initialize the chosen hash function
+	if useSha256 {
+		h = sha256.New()
+	} else if useSha512 {
+		h = sha512.New()
+	} else {
+		h = sha512.New384()
+	}
+
+	// retrieve the content of the specified url and write it into variable h
+	d, err := retrieveContent(uri)
+	if err != nil {
+		exitWithError(err)
+	}
+
+	// create the hash and encode it with base64
+	if _, err := h.Write(d); err != nil {
+		exitWithError(err)
+	}
+	sriHash := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+	if strings.HasSuffix(uri, ".css") {
+		fmt.Println("<link rel=\"stylesheet\" href=\"" + uri + "\" integrity=\"" + hashName + "-" + sriHash + "\" crossorigin=\"anonymous\">")
+	} else {
+		fmt.Println("<script src=\"" + uri + "\" integrity=\"" + hashName + "-" + sriHash + "\" crossorigin=\"anonymous\"></script>")
+	}
+
+	wg.Done()
 }
 
 func exitWithError(err error) {
